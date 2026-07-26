@@ -17,9 +17,9 @@ export default function Header() {
  
         {/* 2. CENTER: Navigation Links (Desktop Only) */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-          <a href="#" className="hover:text-purple-700 transition-colors">Features</a>
-          <a href="#" className="hover:text-purple-700 transition-colors">Resources</a>
-          <a href="#" className="hover:text-purple-700 transition-colors">Pricing</a>
+          <a href="#features" className="hover:text-purple-700 transition-colors">Features</a>
+          <a href="#features" className="hover:text-purple-700 transition-colors">Resources</a>
+          <a href="#features" className="hover:text-purple-700 transition-colors">Pricing</a>
         </nav>
  
         {/* 3. RIGHT: Plan Indicator, Login & Mobile Hamburger */}
