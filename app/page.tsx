@@ -1,7 +1,8 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
-import WidgetEditor from "@/components/WidgetBuilder";
+import InteractiveDemo from "@/components/InteractiveDemo";
+
 
 export default function DashboardPage() {
   return (
@@ -9,7 +10,7 @@ export default function DashboardPage() {
       <Header />
       <Hero />
       <Features />
-      <WidgetEditor />
+     <InteractiveDemo/>
     </main>
   );
 }
