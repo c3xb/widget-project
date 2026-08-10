@@ -11,7 +11,11 @@ interface WidgetConfig {
   avatarChar: string;
 }
 
-export default function OptimizedWidgetEditor() {
+ interface InteractiveDemoProps {
+  onPublish?: () => void; // Question mark makes it optional
+}
+
+export default function OptimizedWidgetEditor({ onPublish }: InteractiveDemoProps) {
   const [widgetConfig, setWidgetConfig] = useState<WidgetConfig>({
     title: 'Instant Social Proof',
     message: 'Someone just signed up from London!',
@@ -33,7 +37,7 @@ export default function OptimizedWidgetEditor() {
   const [autoClose, setAutoClose] = useState<number>(5);
   const [showCloseButton, setShowCloseButton] = useState<boolean>(true)
  
-  
+ 
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-slate-900 p-6 lg:p-10 font-sans bg-purple-50">
@@ -58,7 +62,7 @@ export default function OptimizedWidgetEditor() {
             <span className={`w-2 h-2 rounded-full ${isSyncing ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
             {isSyncing ? 'Saving...' : 'Changes saved'}
           </div>
-          <button className="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-lg transition-all shadow-sm hover:shadow active:scale-[0.98]">
+          <button onClick={onPublish} className="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-lg transition-all shadow-sm hover:shadow active:scale-[0.98] cursor-pointer">
             Publish Changes
           </button>
         </div>
