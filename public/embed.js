@@ -3,21 +3,21 @@
       const currentScript = document.currentScript || document.querySelector('script[data-widget-id]');
       return currentScript ? currentScript.getAttribute('data-widget-id') : null
     }
-    async function fetchConfig(id){
-      try{
-       const res = await fetch(`http://192.168.0.135:3000/api/widget/${id}`);
-         if (!res.ok) {
-      throw new Error(`HTTP error! Status: ${res.status}`);
-    }
+   async function fetchConfig(id) {
+  try {
+    // Reads origin from currentScript without re-writing query selectors
+    const baseUrl = document.currentScript ? new URL(document.currentScript.src).origin : '';
+
+    const res = await fetch(`${baseUrl}/api/widget/${id}`);
+    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+
     const data = await res.json();
     return data;
-  } 
-  
-  catch (error) {
+  } catch (error) {
     console.error("Failed to load widget:", error);
     return null;
   }
-    }
+} 
 
     function renderWidget(config) {
   if (!config) return;

@@ -8,6 +8,7 @@ export async function GET(request, { params }) {
   const { data, error } = await supabase
     .from('reviews')
     .select('customer_name, content, rating')
+    .eq('widget_id', id)
     .eq('is_approved', true)
     .order('created_at', { ascending: false })
     .limit(1)
