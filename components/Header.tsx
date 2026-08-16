@@ -1,6 +1,7 @@
 'use client';
  
 import { useState } from 'react';
+import Link from 'next/link';
  
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,9 +33,14 @@ export default function Header() {
           </div>
  
           {/* Login Button */}
-          <button className="px-4 py-1.5 text-sm font-medium text-white bg-purple-600 border border-gray-200 rounded-lg hover:bg-purple-700 cursor-pointer transition-colors">
+          <Link href="/login" > 
+
+           <button className="px-4 py-1.5 text-sm font-medium text-white bg-purple-600 border border-gray-200 rounded-lg hover:bg-purple-700 cursor-pointer transition-colors">
             Login
           </button>
+
+          </Link>
+        
  
           {/* Hamburger Menu Button (mobile only) */}
           <div className="md:hidden flex items-center">
