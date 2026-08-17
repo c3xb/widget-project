@@ -26,18 +26,11 @@ export function Signup() {
       setLoading(false);
     } else {
       setLoading(false);
-      router.push("/login");
+      router.push("/");
     }
   };
 
-  useEffect(
-    () => {
-        const checkSession = async () => {
-
-        };
-        checkSession()
-    }, [])
-
+ 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white flex items-center justify-center px-4 animate-popup">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-purple-100 p-8">
@@ -55,7 +48,7 @@ export function Signup() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
-              className="placeholder:text-gray-500 w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent  transition"
+              className="text-gray-800 placeholder:text-gray-500 w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent  transition"
             />
           </div>
 

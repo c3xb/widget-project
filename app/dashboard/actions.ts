@@ -33,12 +33,12 @@ export async function createWidget( formData : FormData){
     ])
     .select()
     .single();
-
+    
     if(error) {
-         console.error('Database Error :', error.message);
-         throw new Error('Failed to create widget')
-    }
-    revalidatePath('./dashboard');
+       console.error('Database Error :', error.message);
+       throw new Error('Failed to create widget')
+      }
+      revalidatePath('./dashboard');
+      return data ;
 
-    return data ;
 }
