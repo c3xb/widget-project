@@ -15,7 +15,7 @@ export default function DashboardPage() {
   const sampleWidgetId = "671c008c-30c7-4309-8239-281b3b334582";
 
   return (
-    <main className="min-h-screen bg-purple-50 text-gray-900">
+    <main className="min-h-screen bg-purple-50 text-gray-900 animate-popup">
       <Header />
       <Hero />
       <Features />

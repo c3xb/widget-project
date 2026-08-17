@@ -1,13 +1,34 @@
 'use client';
  
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { User } from '@supabase/supabase-js';
 import Link from 'next/link';
  
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setuser] = useState<User | null>(null);  
+  const [loading, setLoading] = useState(true)
  
+useEffect(() => { const fetchUser = async () => {
+ const {data : {user}} =   await supabase.auth.getUser();
+
+   if(user){
+    setuser(user)
+
+   } else{
+      setuser(null)
+  }
+  setLoading(false);
+   };
+
+   fetchUser()
+  }
+
+ ,[]);
+
   return (
-    <div className="w-full pt-4 px-4 sticky top-0 z-50 flex justify-center">
+    <div className="w-full pt-4 px-4 sticky top-0 z-50 flex justify-center animate-popup">
       <header className="w-full max-w-5xl bg-white/90 backdrop-blur-md border border-gray-200/80 shadow-sm rounded-2xl flex items-center justify-between px-6 py-2.5 relative">
  
         {/* 1. LEFT: Logo */}
@@ -33,14 +54,25 @@ export default function Header() {
           </div>
  
           {/* Login Button */}
-          <Link href="/login" > 
-
-           <button className="px-4 py-1.5 text-sm font-medium text-white bg-purple-600 border border-gray-200 rounded-lg hover:bg-purple-700 cursor-pointer transition-colors">
-            Login
-          </button>
-
-          </Link>
-        
+         
+          {loading ? (
+  /* 1. Loading State: Skeleton placeholder while checking session */
+  <div className="w-20 h-8 bg-gray-200 animate-pulse rounded-lg" />
+) : user ? (
+  /* 2. Logged In State: Show Profile/Dashboard link */
+  <Link href="/profile">
+    <button className="px-4 py-1.5 text-sm font-medium bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition hover: cursor-pointer">
+      Profile
+    </button>
+  </Link>
+) : (
+  /* 3. Logged Out State: Show Login link */
+  <Link href="/login">
+    <button className="px-4 py-1.5 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-100 transition hover: cursor-pointer ">
+      Login
+    </button>
+  </Link>
+)}
  
           {/* Hamburger Menu Button (mobile only) */}
           <div className="md:hidden flex items-center">
