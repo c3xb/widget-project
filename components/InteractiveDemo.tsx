@@ -40,7 +40,7 @@ export default function OptimizedWidgetEditor({ onPublish }: InteractiveDemoProp
  
 
   return (
-    <div className="min-h-screen bg-[#fafafa] text-slate-900 p-6 lg:p-10 font-sans bg-purple-50">
+    <div id="editor" className="min-h-screen bg-[#fafafa] text-slate-900 p-6 lg:p-10 font-sans bg-purple-50">
       {/* HEADER SECTION */}
       <header className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 pb-8 mb-8 border-b border-slate-200">
         <div>

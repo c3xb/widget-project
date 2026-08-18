@@ -6,7 +6,8 @@ import Hero from '@/components/Hero';
 import Features from '@/components/Features';
 import InteractiveDemo from '@/components/InteractiveDemo';
 import EmbedModal from '@/components/EmbedModal';
-
+import WidgetTemplatesPage from '@/components/templates';
+import Footer from '@/components/Footer';
 
 export default function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,7 +30,8 @@ export default function DashboardPage() {
         onClose={() => setIsModalOpen(false)} 
         widgetId={sampleWidgetId} 
       />
-      
+      <WidgetTemplatesPage/>
+      <Footer/>
     </main>
   );
 }
