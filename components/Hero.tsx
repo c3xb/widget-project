@@ -45,7 +45,10 @@ export default function Hero() {
           Start Building for Free
         </button>
         
-        <button className="w-full sm:w-auto px-8 py-3.5 bg-white text-gray-700 border border-gray-200 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-all cursor-pointer">
+        <button onClick={(e) => {
+    e.preventDefault(); // Stops the browser from changing the URL or hard jumping
+    scrollToSection('templates'); // Runs your smooth scroll function
+  }} className="w-full sm:w-auto px-8 py-3.5 bg-white text-gray-700 border border-gray-200 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-all cursor-pointer">
           View Templates
         </button>
       </div>

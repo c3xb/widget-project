@@ -198,7 +198,7 @@ export default function WidgetTemplatesPage() {
   }, [selectedCategory, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-purple-50 text-gray-900 font-sans antialiased py-12 px-4 sm:px-6 lg:px-8 mb-50">
+    <div id="templates" className="min-h-screen bg-purple-50 text-gray-900 font-sans antialiased py-12 px-4 sm:px-6 lg:px-8 mb-50">
       <main className="max-w-7xl mx-auto space-y-12">
         
         {/* Header Hero Section */}
