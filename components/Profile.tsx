@@ -24,7 +24,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-purple-50 flex items-center justify-center p-6">
-      <div className="w-full max-w-2xl min-h-[720px] bg-white rounded-2xl shadow-sm p-16">
+      <div className="w-full max-w-2xl  bg-white rounded-2xl shadow-sm p-6">
         <a
           href="/"
           className="flex items-center gap-2 text-purple-600 font-medium text-sm mb-8 hover:text-purple-700 transition-colors w-fit"
