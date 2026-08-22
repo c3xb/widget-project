@@ -23,7 +23,7 @@ export default function Footer() {
             <div className="flex items-center gap-2.5">
               {/* ProofPad Logo Mark */}
               <div className="w-8 h-8 rounded-xl bg-white text-purple-800 flex items-center justify-center font-black text-sm shadow-sm">
-                P
+              <img src="/proofpad-logo.svg" alt="Proofpad logo" className="w-8 h-8 rounded-lg" />
               </div>
               <span className="text-lg font-extrabold text-white tracking-tight">
                 ProofPad
