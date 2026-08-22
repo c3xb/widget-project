@@ -1,4 +1,18 @@
+'use client'
+
+
 export default function Hero() {
+  
+  const scrollToSection = (id: string) => {
+  // If you are on the homepage:
+  const element = document.getElementById(id);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    // If you are on another page (like /profile), go to home first:
+    window.location.href = `/#${id}`;
+  }
+};
   return (
     <main className="w-full flex flex-col items-center justify-center px-4 pt-28 pb-20 text-center">
       
@@ -24,7 +38,10 @@ export default function Hero() {
 
       {/* أزرار اتخاذ الإجراء (CTA Buttons) */}
       <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-        <button className="w-full sm:w-auto px-8 py-3.5 bg-purple-600 text-white rounded-xl font-semibold text-lg hover:bg-purple-700 transition-all shadow-lg shadow-purple-600/30 cursor-pointer">
+        <button onClick={(e) => {
+    e.preventDefault(); // Stops the browser from changing the URL or hard jumping
+    scrollToSection('editor'); // Runs your smooth scroll function
+  }}  className="w-full sm:w-auto px-8 py-3.5 bg-purple-600 text-white rounded-xl font-semibold text-lg hover:bg-purple-700 transition-all shadow-lg shadow-purple-600/30 cursor-pointer">
           Start Building for Free
         </button>
         
