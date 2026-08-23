@@ -1,33 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { User } from '@supabase/supabase-js';
+import { useAuth } from '@/app/context/AuthContext';
+import {  useState } from 'react';
 import Link from 'next/link';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setuser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true)
+ 
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (user) {
-        setuser(user)
-
-      } else {
-        setuser(null)
-      }
-      setLoading(false);
-    };
-
-    fetchUser()
-  }
-
-    , []);
-
+  
   const scrollToSection = (id: string) => {
     // If you are on the homepage:
     const element = document.getElementById(id);

@@ -1,5 +1,6 @@
 'use client'; // Required for React state management
 
+import { AuthProvider } from './context/AuthContext';
 import { useState } from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
@@ -16,7 +17,8 @@ export default function DashboardPage() {
   const sampleWidgetId = "671c008c-30c7-4309-8239-281b3b334582";
 
   return (
-    <main className="min-h-screen bg-purple-50 text-gray-900 animate-popup">
+    <AuthProvider> 
+      <main className="min-h-screen bg-purple-50 text-gray-900 animate-popup">
       <Header />
       <Hero />
       <Features />
@@ -33,5 +35,7 @@ export default function DashboardPage() {
       <WidgetTemplatesPage/>
       <Footer/>
     </main>
+    </AuthProvider>
+   
   );
 }
