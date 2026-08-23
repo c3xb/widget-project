@@ -35,7 +35,7 @@ export default function Header() {
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
           <a onClick={() => scrollToSection('features')} className="hover:text-purple-700 transition-colors hover: cursor-pointer">Features</a>
           <a onClick={() => scrollToSection('editor')} className="hover:text-purple-700 transition-colors hover: cursor-pointer">Widget Editor</a>
-          <a className="hover:text-purple-700 transition-colors hover: cursor-pointer">Pricing</a>
+          <a onClick={() => scrollToSection('templates')} className="hover:text-purple-700 transition-colors hover: cursor-pointer">Templates</a>
         </nav>
 
         {/* 3. RIGHT: Plan Indicator, Login & Mobile Hamburger */}

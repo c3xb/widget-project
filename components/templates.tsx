@@ -1,504 +1,613 @@
-"use client";
+'use client';
 
-import { useState, useMemo } from "react";
-import Link from "next/link";
+/* ==============================================================
+   ProofPad — Embeddable Widget Template Library
+   --------------------------------------------------------------
+   15 self-contained, production-ready social proof widgets.
+   Every widget: white card + bg-purple-50 accents + purple-600
+   buttons. Positioning (fixed / sticky / inline) is left to the
+   consumer so each component stays portable across pages.
 
-// --- TYPES ---
-export type Category = "All" | "Social Proof" | "Urgency" | "Reviews" | "Announcements" | "Leads";
+   Setup:
+     npm i lucide-react   (if not already installed)
 
-export interface WidgetTemplate {
-  id: string;
-  title: string;
-  category: Exclude<Category, "All">;
-  description: string;
-  badge: string;
-  isFeatured?: boolean;
-  iconType: "shopping-bag" | "zap" | "star" | "pulse" | "megaphone" | "box" | "user-plus" | "shield" | "clock" | "trending-up" | "mail" | "gift";
-  preview: {
-    title: string;
-    subtitle: string;
-    time?: string;
-    rating?: number;
-    ctaText?: string;
-    isLive?: boolean;
-  };
+   Example embed usage:
+     <div className="fixed bottom-4 left-4 z-50">
+       <RecentPurchaseToast name="Alex P." product="the Growth plan" />
+     </div>
+
+   The default export at the bottom is a preview gallery of all
+   15 templates — drop this file into a route to see them live,
+   then import individual components into your real pages.
+   ============================================================== */
+
+import { useState, useEffect, type ReactNode } from 'react';
+import {
+  X,
+  Star,
+  CheckCircle2,
+  MapPin,
+  Eye,
+  Quote,
+  TrendingUp,
+  Flame,
+  ChevronLeft,
+  ChevronRight,
+  PartyPopper,
+  ShoppingCart,
+  Mail,
+  BadgeCheck,
+  Sparkles,
+} from 'lucide-react';
+
+/* 1. Recent Purchase Toast ------------------------------------ */
+export interface RecentPurchaseToastProps {
+  name?: string;
+  location?: string;
+  product?: string;
+  timeAgo?: string;
+  avatarUrl?: string;
 }
 
-// --- 12 STANDOUT FEATURED TEMPLATES ---
-const FEATURED_TEMPLATES: WidgetTemplate[] = [
-  {
-    id: "feat-recent-purchase",
-    title: "Recent Purchase Activity",
-    category: "Social Proof",
-    description: "Display verified customer purchases in real-time to build immediate buying confidence.",
-    badge: "Top Converter",
-    isFeatured: true,
-    iconType: "shopping-bag",
-    preview: { title: "Sarah M. (New York)", subtitle: "Purchased Pro Lifetime Membership", time: "2 minutes ago" }
-  },
-  {
-    id: "feat-countdown-banner",
-    title: "Synchronized Offer Expiration",
-    category: "Urgency",
-    description: "Drive immediate action with a synchronized offer expiration banner.",
-    badge: "High Urgency",
-    isFeatured: true,
-    iconType: "zap",
-    preview: { title: "Special Launch Promotion", subtitle: "Save 30% on annual billing today", time: "04m 32s remaining", ctaText: "Claim Discount" }
-  },
-  {
-    id: "feat-verified-review",
-    title: "Executive Endorsement Card",
-    category: "Reviews",
-    description: "Highlight authentic client feedback and star ratings from verified accounts.",
-    badge: "Social Trust",
-    isFeatured: true,
-    iconType: "star",
-    preview: { title: "Alex Miller — Founder", subtitle: '"ProofPad increased our checkout conversion rate by 24% in 10 days."', rating: 5 }
-  },
-  {
-    id: "feat-live-traffic",
-    title: "Active Viewers Counter",
-    category: "Social Proof",
-    description: "Show real-time active site visitors to signal high product demand.",
-    badge: "Real-Time",
-    isFeatured: true,
-    iconType: "pulse",
-    preview: { title: "48 Active Viewers", subtitle: "Currently exploring product pricing", time: "Live updates", isLive: true }
-  },
-  {
-    id: "feat-product-release",
-    title: "Changelog Release Alert",
-    category: "Announcements",
-    description: "Broadcast major platform updates, feature releases, or patch notes.",
-    badge: "Updates",
-    iconType: "megaphone",
-    preview: { title: "Version 2.0 Released", subtitle: "Explore updated analytics and real-time event tracking.", ctaText: "View Changelog" }
-  },
-  {
-    id: "feat-inventory-scarcity",
-    title: "Stock Capacity Indicator",
-    category: "Urgency",
-    description: "Inform prospective buyers when remaining inventory or cohort seats are low.",
-    badge: "Scarcity",
-    isFeatured: true,
-    iconType: "box",
-    preview: { title: "Limited Seats Remaining", subtitle: "Only 3 spots left for this live session." }
-  },
-  {
-    id: "feat-user-signup",
-    title: "Live Account Registrations",
-    category: "Social Proof",
-    description: "Trigger notifications whenever a new user signs up for your platform.",
-    badge: "Growth",
-    isFeatured: true,
-    iconType: "user-plus",
-    preview: { title: "David K. joined ProofPad", subtitle: "Started a 14-day free trial", time: "5 minutes ago" }
-  },
-  {
-    id: "feat-guarantee-badge",
-    title: "Risk-Free Guarantee Banner",
-    category: "Social Proof",
-    description: "Remove buyer hesitation with prominent refund and satisfaction guarantees.",
-    badge: "Trust Anchor",
-    isFeatured: true,
-    iconType: "shield",
-    preview: { title: "30-Day Guarantee", subtitle: "Full refund if not completely satisfied." }
-  },
-  {
-    id: "feat-flash-sale",
-    title: "Flash Sale Timer Bar",
-    category: "Urgency",
-    description: "Trigger impulse conversion with an urgent countdown timer notification.",
-    badge: "Sales Boost",
-    iconType: "clock",
-    preview: { title: "Midnight Sale Ending", subtitle: "Use code FLASH50 at checkout", time: "01h 12m remaining" }
-  },
-  {
-    id: "feat-milestone-stats",
-    title: "Global Traction Milestone",
-    category: "Social Proof",
-    description: "Display total registered users, volume processed, or downloads.",
-    badge: "Authority",
-    isFeatured: true,
-    iconType: "trending-up",
-    preview: { title: "10,000+ Active Teams", subtitle: "Trusted across 40+ countries worldwide" }
-  },
-  {
-    id: "feat-lead-capture",
-    title: "Growth Digest Opt-In",
-    category: "Leads",
-    description: "Capture email subscribers with a clean non-intrusive bottom bar.",
-    badge: "Lead Gen",
-    isFeatured: true,
-    iconType: "mail",
-    preview: { title: "Weekly Insights", subtitle: "Join 5,000+ founders receiving our newsletter.", ctaText: "Subscribe" }
-  },
-  {
-    id: "feat-welcome-discount",
-    title: "First-Touch Promo Perk",
-    category: "Leads",
-    description: "Offer custom coupon codes to first-time website visitors.",
-    badge: "Welcome Perk",
-    isFeatured: true,
-    iconType: "gift",
-    preview: { title: "Welcome Discount", subtitle: "Get 15% off your first checkout today.", ctaText: "Claim Perk" }
-  }
-];
-
-// --- 100+ CATALOG GENERATOR FUNCTION ---
-function generateCatalogTemplates(): WidgetTemplate[] {
-  const categories: Exclude<Category, "All">[] = ["Social Proof", "Urgency", "Reviews", "Announcements", "Leads"];
-  const iconTypes: WidgetTemplate["iconType"][] = ["shopping-bag", "zap", "star", "pulse", "megaphone", "box", "user-plus", "shield", "clock", "trending-up", "mail", "gift"];
-  
-  const catalog: WidgetTemplate[] = [];
-
-  const templatesPerCat = 22; // 5 x 22 = 110 additional templates
-
-  categories.forEach((cat) => {
-    for (let i = 1; i <= templatesPerCat; i++) {
-      const icon = iconTypes[(i + cat.length) % iconTypes.length];
-      catalog.push({
-        id: `cat-${cat.toLowerCase().replace(/\s+/g, "-")}-${i}`,
-        title: `${cat} Module ${i < 10 ? "0" + i : i}`,
-        category: cat,
-        description: `Optimized layout designed specifically for high-impact ${cat.toLowerCase()} engagement.`,
-        badge: `Variant ${i}`,
-        iconType: icon,
-        preview: {
-          title: `${cat} Alert #${i}`,
-          subtitle: `Automated dynamic trigger for modern website visitors.`,
-          time: i % 2 === 0 ? "Just now" : "10m ago",
-          rating: cat === "Reviews" ? 5 : undefined,
-          isLive: i % 3 === 0
-        }
-      });
-    }
-  });
-
-  return catalog;
-}
-
-const ALL_CATALOG_TEMPLATES = generateCatalogTemplates();
-const CATEGORIES: Category[] = ["All", "Social Proof", "Urgency", "Reviews", "Announcements", "Leads"];
-
-export default function WidgetTemplatesPage() {
-  const [selectedCategory, setSelectedCategory] = useState<Category>("All");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"featured" | "catalog">("featured");
-
-  // Filter Catalog
-  const filteredCatalog = useMemo(() => {
-    return ALL_CATALOG_TEMPLATES.filter((t) => {
-      const matchesCat = selectedCategory === "All" || t.category === selectedCategory;
-      const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            t.description.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCat && matchesSearch;
-    });
-  }, [selectedCategory, searchQuery]);
+export function RecentPurchaseToast({
+  name = 'Sarah M.',
+  location = 'New York, US',
+  product = 'the Pro Plan',
+  timeAgo = '2 minutes ago',
+  avatarUrl,
+}: RecentPurchaseToastProps) {
+  const [visible, setVisible] = useState(true);
+  if (!visible) return null;
 
   return (
-    <div id="templates" className="min-h-screen bg-purple-50 text-gray-900 font-sans antialiased py-12 px-4 sm:px-6 lg:px-8 mb-50">
-      <main className="max-w-7xl mx-auto space-y-12">
-        
-        {/* Header Hero Section */}
-        <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white text-purple-700 border border-purple-200 inline-block shadow-xs">
-            100+ Professional Layouts
-          </span>
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
-            Widget Template Library
-          </h1>
-          <p className="text-sm sm:text-base text-gray-500 font-normal leading-relaxed">
-            Explore our curated gallery of high-converting social proof widgets. Choose from our 12 featured flagship templates or search through our 100+ specialized design variants.
-          </p>
-
-          {/* Navigation Mode Switcher */}
-          <div className="inline-flex p-1 bg-white border border-purple-100 rounded-2xl shadow-xs mt-4">
-            <button
-              onClick={() => setActiveTab("featured")}
-              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeTab === "featured"
-                  ? "bg-purple-600 text-white shadow-xs"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              ⭐ Featured (12 Standouts)
-            </button>
-            <button
-              onClick={() => setActiveTab("catalog")}
-              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeTab === "catalog"
-                  ? "bg-purple-600 text-white shadow-xs"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              📚 Full Catalog (100+)
-            </button>
+    <div id="templates" className="flex w-full max-w-sm items-start gap-3 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-purple-100">
+      <div className="relative flex-shrink-0">
+        {avatarUrl ? (
+          <img src={avatarUrl} alt={name} className="h-11 w-11 rounded-full object-cover" />
+        ) : (
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-purple-100 font-semibold text-purple-700">
+            {name.charAt(0)}
           </div>
-        </div>
-
-        {/* SECTION 1: 12 STANDOUT FEATURED SHOWCASE */}
-        {activeTab === "featured" && (
-          <section className="space-y-6">
-            <div className="flex items-center justify-between border-b border-purple-100 pb-4">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Flagship Designs</h2>
-                <p className="text-xs text-gray-500">Our highest converting widgets engineered for instant setup.</p>
-              </div>
-              <span className="text-xs font-semibold text-purple-700 bg-purple-100/60 px-3 py-1 rounded-full border border-purple-200">
-                12 Selected
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {FEATURED_TEMPLATES.map((template) => (
-                <div
-                  key={template.id}
-                  className="bg-white rounded-2xl border border-purple-100 p-6 shadow-xs hover:border-purple-300 transition-all flex flex-col justify-between space-y-6 relative group"
-                >
-                  {/* Top Meta */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-100">
-                        {template.badge}
-                      </span>
-                      <span className="text-xs font-medium text-gray-400">
-                        {template.category}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
-                        {template.title}
-                      </h3>
-                      <p className="text-xs text-gray-500 leading-relaxed mt-1">
-                        {template.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Component Live Preview Box */}
-                  <div className="bg-purple-50/40 rounded-xl border border-purple-100/80 p-4 relative">
-                    <div className="flex items-center justify-between mb-2.5">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400">
-                        Component Preview
-                      </span>
-                      {template.preview.isLive && (
-                        <span className="flex items-center gap-1.5 text-[10px] font-semibold text-emerald-600">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          Live
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="bg-white rounded-xl p-3.5 shadow-xs border border-purple-100/60 flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0">
-                        <TemplateIcon type={template.iconType} />
-                      </div>
-                      <div className="space-y-0.5 min-w-0 flex-1">
-                        <p className="text-xs font-semibold text-gray-900 truncate">
-                          {template.preview.title}
-                        </p>
-                        <p className="text-[11px] text-gray-500 font-normal leading-snug line-clamp-2">
-                          {template.preview.subtitle}
-                        </p>
-                        {template.preview.rating && (
-                          <div className="flex items-center gap-0.5 pt-1">
-                            {Array.from({ length: template.preview.rating }).map((_, i) => (
-                              <svg key={i} className="w-3 h-3 text-amber-400 fill-current" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                              </svg>
-                            ))}
-                          </div>
-                        )}
-                        {template.preview.time && (
-                          <span className="text-[10px] font-medium text-gray-400 block pt-0.5">
-                            {template.preview.time}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Link */}
-                  <Link href={`/builder?template=${template.id}`}>
-                    <button className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-xl transition-all shadow-xs cursor-pointer text-center">
-                      Use Template
-                    </button>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </section>
         )}
-
-        {/* SECTION 2: 100+ CATALOG MATRIX WITH CATEGORIES & SEARCH */}
-        {activeTab === "catalog" && (
-          <section className="space-y-8">
-            
-            {/* Search & Filter Controls */}
-            <div className="bg-white rounded-2xl border border-purple-100 p-4 sm:p-6 shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                
-                {/* Search Input */}
-                <div className="relative w-full sm:w-80">
-                  <svg className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input
-                    type="text"
-                    placeholder="Search 100+ templates..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-purple-50/50 border border-purple-100 rounded-xl text-xs text-gray-900 focus:outline-hidden focus:border-purple-400 transition-all"
-                  />
-                </div>
-
-                {/* Category Pills */}
-                <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
-                  {CATEGORIES.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setSelectedCategory(cat)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                        selectedCategory === cat
-                          ? "bg-purple-600 text-white shadow-xs"
-                          : "bg-purple-50/60 text-gray-600 hover:bg-purple-100/60 border border-purple-100/60"
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="text-xs text-gray-400 font-medium pt-1">
-                Showing <span className="text-gray-900 font-bold">{filteredCatalog.length}</span> templates in catalog
-              </div>
-            </div>
-
-            {/* Catalog Grid Matrix */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {filteredCatalog.map((template) => (
-                <div
-                  key={template.id}
-                  className="bg-white rounded-xl border border-purple-100 p-4 hover:border-purple-300 transition-all flex flex-col justify-between space-y-4 shadow-2xs group"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-purple-600 uppercase tracking-wider">
-                        {template.category}
-                      </span>
-                      <span className="text-[10px] font-semibold text-gray-400">
-                        {template.badge}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2.5 pt-1">
-                      <div className="w-7 h-7 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0">
-                        <TemplateIcon type={template.iconType} />
-                      </div>
-                      <h4 className="text-xs font-bold text-gray-900 truncate group-hover:text-purple-600 transition-colors">
-                        {template.title}
-                      </h4>
-                    </div>
-
-                    <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">
-                      {template.description}
-                    </p>
-                  </div>
-
-                  <Link href={`/builder?template=${template.id}`}>
-                    <button className="w-full py-1.5 bg-purple-50 hover:bg-purple-600 hover:text-white text-purple-700 text-[11px] font-semibold rounded-lg transition-all cursor-pointer border border-purple-100">
-                      Select
-                    </button>
-                  </Link>
-                </div>
-              ))}
-            </div>
-
-          </section>
-        )}
-
-      </main>
+        <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-purple-600 ring-2 ring-white">
+          <CheckCircle2 className="h-3 w-3 text-white" />
+        </span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm text-gray-900">
+          <span className="font-semibold">{name}</span> purchased{' '}
+          <span className="font-semibold">{product}</span>
+        </p>
+        <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+          <MapPin className="h-3 w-3" /> {location} · {timeAgo}
+        </p>
+      </div>
+      <button
+        onClick={() => setVisible(false)}
+        aria-label="Dismiss"
+        className="flex-shrink-0 text-gray-300 transition-colors hover:text-gray-500"
+      >
+        <X className="h-4 w-4" />
+      </button>
     </div>
   );
 }
 
-// --- SVG ICON COMPONENT ---
-function TemplateIcon({ type }: { type: WidgetTemplate["iconType"] }) {
-  switch (type) {
-    case "shopping-bag":
-      return (
-        <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-        </svg>
-      );
-    case "zap":
-      return (
-        <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      );
-    case "star":
-      return (
-        <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      );
-    case "pulse":
-      return (
-        <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-        </svg>
-      );
-    case "megaphone":
-      return (
-        <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c.41 0 .789.24.96.618l.848 1.864m2.14 7.201a4 4 0 01-1.38 0l-2.14-.535" />
-        </svg>
-      );
-    case "box":
-      return (
-        <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-        </svg>
-      );
-    case "user-plus":
-      return (
-        <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-        </svg>
-      );
-    case "shield":
-      return (
-        <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-        </svg>
-      );
-    case "clock":
-      return (
-        <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      );
-    case "trending-up":
-      return (
-        <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-        </svg>
-      );
-    case "mail":
-      return (
-        <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      );
-    case "gift":
-      return (
-        <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V6a2 2 0 10-2 2h2zm-7 4h14M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-        </svg>
-      );
-  }
+/* 2. Live Visitor Counter -------------------------------------- */
+export interface LiveVisitorCounterProps {
+  base?: number;
+}
+
+export function LiveVisitorCounter({ base = 23 }: LiveVisitorCounterProps) {
+  const [count, setCount] = useState(base);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCount((c) => Math.max(3, c + (Math.random() > 0.5 ? 1 : -1)));
+    }, 4000);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-md ring-1 ring-purple-100">
+      <span className="relative flex h-2.5 w-2.5">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75" />
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-purple-600" />
+      </span>
+      <Eye className="h-4 w-4 text-purple-600" />
+      <span className="text-sm font-medium text-gray-800">
+        <span className="font-bold text-purple-700">{count}</span> people viewing this now
+      </span>
+    </div>
+  );
+}
+
+/* 3. Testimonial Card ------------------------------------------ */
+export interface TestimonialCardProps {
+  quote?: string;
+  name?: string;
+  role?: string;
+  rating?: number;
+  avatarUrl?: string;
+}
+
+export function TestimonialCard({
+  quote = 'ProofPad paid for itself in the first week. Conversions on our landing page jumped almost overnight.',
+  name = 'Daniela Rossi',
+  role = 'Founder, Loop Studio',
+  rating = 5,
+  avatarUrl,
+}: TestimonialCardProps) {
+  return (
+    <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-lg ring-1 ring-purple-100">
+      <Quote className="h-6 w-6 text-purple-300" />
+      <div className="mt-2 flex gap-0.5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Star
+            key={i}
+            className={`h-4 w-4 ${i < rating ? 'fill-purple-500 text-purple-500' : 'text-gray-200'}`}
+          />
+        ))}
+      </div>
+      <p className="mt-3 text-sm leading-relaxed text-gray-700">&ldquo;{quote}&rdquo;</p>
+      <div className="mt-4 flex items-center gap-3">
+        {avatarUrl ? (
+          <img src={avatarUrl} alt={name} className="h-10 w-10 rounded-full object-cover" />
+        ) : (
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 text-sm font-semibold text-purple-700">
+            {name.split(' ').map((n) => n[0]).join('')}
+          </div>
+        )}
+        <div>
+          <p className="text-sm font-semibold text-gray-900">{name}</p>
+          <p className="text-xs text-gray-500">{role}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* 4. Trust Badge Bar --------------------------------------------- */
+export interface TrustBadgeBarProps {
+  label?: string;
+  companies?: string[];
+}
+
+export function TrustBadgeBar({
+  label = 'Trusted by teams at',
+  companies = ['Nova', 'Fenwick', 'Aurelia', 'Kepler Labs', 'Drift & Co'],
+}: TrustBadgeBarProps) {
+  return (
+    <div className="w-full rounded-2xl bg-white p-6 shadow-md ring-1 ring-purple-100">
+      <p className="text-center text-xs font-medium uppercase tracking-wide text-gray-400">
+        {label}
+      </p>
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+        {companies.map((c) => (
+          <span key={c} className="text-lg font-semibold text-gray-400">
+            {c}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* 5. Rating Summary ----------------------------------------------- */
+export interface RatingSummaryProps {
+  average?: number;
+  totalReviews?: number;
+  breakdown?: number[]; // percentage for 5,4,3,2,1 stars
+}
+
+export function RatingSummary({
+  average = 4.8,
+  totalReviews = 1240,
+  breakdown = [82, 12, 4, 1, 1],
+}: RatingSummaryProps) {
+  return (
+    <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-lg ring-1 ring-purple-100">
+      <div className="flex items-center gap-4">
+        <div className="text-center">
+          <p className="text-4xl font-bold text-gray-900">{average}</p>
+          <div className="mt-1 flex gap-0.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star
+                key={i}
+                className={`h-3.5 w-3.5 ${
+                  i < Math.round(average) ? 'fill-purple-500 text-purple-500' : 'text-gray-200'
+                }`}
+              />
+            ))}
+          </div>
+          <p className="mt-1 text-xs text-gray-500">{totalReviews.toLocaleString()} reviews</p>
+        </div>
+        <div className="flex-1 space-y-1">
+          {breakdown.map((pct, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="w-3 text-xs text-gray-500">{5 - i}</span>
+              <div className="h-1.5 flex-1 rounded-full bg-purple-100">
+                <div className="h-1.5 rounded-full bg-purple-500" style={{ width: `${pct}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* 6. Urgency Countdown Banner -------------------------------------- */
+export interface UrgencyCountdownBannerProps {
+  endsInSeconds?: number;
+  message?: string;
+  ctaLabel?: string;
+  onCtaClick?: () => void;
+}
+
+export function UrgencyCountdownBanner({
+  endsInSeconds = 3600 * 2 + 15 * 60,
+  message = 'Flash sale ends in',
+  ctaLabel = 'Claim discount',
+  onCtaClick,
+}: UrgencyCountdownBannerProps) {
+  const [remaining, setRemaining] = useState(endsInSeconds);
+
+  useEffect(() => {
+    const id = setInterval(() => setRemaining((r) => (r > 0 ? r - 1 : 0)), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  const h = Math.floor(remaining / 3600);
+  const m = Math.floor((remaining % 3600) / 60);
+  const s = remaining % 60;
+
+  return (
+    <div className="flex w-full flex-col items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-md ring-1 ring-purple-100 sm:flex-row">
+      <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
+        <Flame className="h-4 w-4 text-purple-600" />
+        {message}
+        <span className="rounded-md bg-purple-50 px-2 py-1 font-mono text-sm font-semibold text-purple-700">
+          {pad(h)}:{pad(m)}:{pad(s)}
+        </span>
+      </div>
+      <button
+        onClick={onCtaClick}
+        className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-purple-700"
+      >
+        {ctaLabel}
+      </button>
+    </div>
+  );
+}
+
+/* 7. Recent Signup Notification -------------------------------------- */
+export interface RecentSignupNotificationProps {
+  name?: string;
+  plan?: string;
+  timeAgo?: string;
+}
+
+export function RecentSignupNotification({
+  name = 'James K.',
+  plan = 'the free trial',
+  timeAgo = 'just now',
+}: RecentSignupNotificationProps) {
+  const [visible, setVisible] = useState(true);
+  if (!visible) return null;
+
+  return (
+    <div className="flex w-full max-w-sm items-center gap-3 rounded-xl bg-white py-3 pl-3 pr-4 shadow-lg ring-1 ring-purple-100">
+      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-purple-600">
+        <Sparkles className="h-4 w-4 text-white" />
+      </div>
+      <p className="flex-1 text-sm text-gray-700">
+        <span className="font-semibold text-gray-900">{name}</span> signed up for {plan}
+        <span className="ml-1 text-gray-400">· {timeAgo}</span>
+      </p>
+      <button
+        onClick={() => setVisible(false)}
+        aria-label="Dismiss"
+        className="text-gray-300 transition-colors hover:text-gray-500"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+/* 8. Low Stock Alert ---------------------------------------------- */
+export interface LowStockAlertProps {
+  itemsLeft?: number;
+  productName?: string;
+}
+
+export function LowStockAlert({ itemsLeft = 3, productName = 'this item' }: LowStockAlertProps) {
+  return (
+    <div className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 shadow-sm ring-1 ring-purple-100">
+      <Flame className="h-4 w-4 text-purple-600" />
+      <p className="text-sm text-gray-700">
+        Only <span className="font-semibold text-purple-700">{itemsLeft} left</span> of {productName}{' '}
+        — order soon
+      </p>
+    </div>
+  );
+}
+
+/* 9. Live Sales Counter -------------------------------------------- */
+export interface LiveSalesCounterProps {
+  base?: number;
+  label?: string;
+}
+
+export function LiveSalesCounter({ base = 152, label = 'sold today' }: LiveSalesCounterProps) {
+  const [count, setCount] = useState(base);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (Math.random() > 0.6) setCount((c) => c + 1);
+    }, 5000);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div className="flex w-full max-w-xs items-center gap-3 rounded-2xl bg-white p-4 shadow-md ring-1 ring-purple-100">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-50">
+        <TrendingUp className="h-5 w-5 text-purple-600" />
+      </div>
+      <div>
+        <p className="text-lg font-bold text-gray-900">{count.toLocaleString()}</p>
+        <p className="text-xs text-gray-500">{label}</p>
+      </div>
+    </div>
+  );
+}
+
+/* 10. Review Carousel ------------------------------------------------ */
+interface Review {
+  quote: string;
+  name: string;
+  rating: number;
+}
+
+export interface ReviewCarouselProps {
+  reviews?: Review[];
+}
+
+const defaultReviews: Review[] = [
+  { quote: 'Setup took five minutes and the widgets just work.', name: 'Priya S.', rating: 5 },
+  { quote: 'Our signup rate is up 18% since adding the live counter.', name: 'Tom H.', rating: 5 },
+  { quote: 'Clean, fast, and it actually looks good on our site.', name: 'Elena V.', rating: 4 },
+];
+
+export function ReviewCarousel({ reviews = defaultReviews }: ReviewCarouselProps) {
+  const [index, setIndex] = useState(0);
+  const review = reviews[index];
+
+  const prev = () => setIndex((i) => (i - 1 + reviews.length) % reviews.length);
+  const next = () => setIndex((i) => (i + 1) % reviews.length);
+
+  return (
+    <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-lg ring-1 ring-purple-100">
+      <div className="flex gap-0.5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Star
+            key={i}
+            className={`h-4 w-4 ${i < review.rating ? 'fill-purple-500 text-purple-500' : 'text-gray-200'}`}
+          />
+        ))}
+      </div>
+      <p className="mt-3 min-h-[3.5rem] text-sm leading-relaxed text-gray-700">
+        &ldquo;{review.quote}&rdquo;
+      </p>
+      <div className="mt-4 flex items-center justify-between">
+        <p className="text-sm font-semibold text-gray-900">{review.name}</p>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={prev}
+            aria-label="Previous review"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-purple-50 text-purple-600 transition-colors hover:bg-purple-100"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            onClick={next}
+            aria-label="Next review"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-purple-50 text-purple-600 transition-colors hover:bg-purple-100"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* 11. As Seen On Bar -------------------------------------------------- */
+export interface AsSeenOnBarProps {
+  outlets?: string[];
+}
+
+export function AsSeenOnBar({
+  outlets = ['TechCrunch', 'Product Hunt', 'Indie Hackers', 'The Verge'],
+}: AsSeenOnBarProps) {
+  return (
+    <div className="w-full rounded-2xl bg-white p-5 shadow-sm ring-1 ring-purple-100">
+      <p className="text-center text-xs font-semibold uppercase tracking-wider text-purple-700">
+        As featured in
+      </p>
+      <div className="mt-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+        {outlets.map((o) => (
+          <span key={o} className="text-sm font-medium text-gray-500">
+            {o}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* 12. Milestone Announcement -------------------------------------------- */
+export interface MilestoneAnnouncementProps {
+  message?: string;
+}
+
+export function MilestoneAnnouncement({
+  message = 'We just crossed 10,000 happy customers!',
+}: MilestoneAnnouncementProps) {
+  const [visible, setVisible] = useState(true);
+  if (!visible) return null;
+
+  return (
+    <div className="flex w-full max-w-md items-center gap-3 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-purple-100">
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-600">
+        <PartyPopper className="h-5 w-5 text-white" />
+      </div>
+      <p className="flex-1 text-sm font-medium text-gray-800">{message}</p>
+      <button
+        onClick={() => setVisible(false)}
+        aria-label="Dismiss"
+        className="text-gray-300 transition-colors hover:text-gray-500"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+/* 13. Cart Activity Notification ------------------------------------------ */
+export interface CartActivityNotificationProps {
+  count?: number;
+  productName?: string;
+}
+
+export function CartActivityNotification({
+  count = 5,
+  productName = 'this item',
+}: CartActivityNotificationProps) {
+  return (
+    <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-md ring-1 ring-purple-100">
+      <ShoppingCart className="h-4 w-4 text-purple-600" />
+      <p className="text-sm text-gray-700">
+        <span className="font-semibold text-purple-700">{count} people</span> have {productName} in
+        their cart
+      </p>
+    </div>
+  );
+}
+
+/* 14. Newsletter Social Proof Form ------------------------------------------ */
+export interface NewsletterSocialProofFormProps {
+  subscriberCount?: number;
+  onSubmit?: (email: string) => void;
+}
+
+export function NewsletterSocialProofForm({
+  subscriberCount = 3400,
+  onSubmit,
+}: NewsletterSocialProofFormProps) {
+  const [email, setEmail] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = () => {
+    if (!email.includes('@')) return;
+    onSubmit?.(email);
+    setSubmitted(true);
+  };
+
+  return (
+    <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-lg ring-1 ring-purple-100">
+      <div className="flex items-center gap-2">
+        <Mail className="h-5 w-5 text-purple-600" />
+        <p className="text-sm font-semibold text-gray-900">Get updates in your inbox</p>
+      </div>
+      <p className="mt-1 text-xs text-gray-500">
+        Join {subscriberCount.toLocaleString()}+ subscribers already reading
+      </p>
+      {submitted ? (
+        <p className="mt-3 flex items-center gap-2 text-sm font-medium text-purple-700">
+          <CheckCircle2 className="h-4 w-4" /> You&apos;re on the list.
+        </p>
+      ) : (
+        <div className="mt-3 flex gap-2">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="flex-1 rounded-lg border border-purple-100 bg-purple-50/50 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:border-purple-400 focus:outline-none focus:ring-1 focus:ring-purple-400"
+          />
+          <button
+            onClick={handleSubmit}
+            className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-purple-700"
+          >
+            Join
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* 15. Verified Purchase Badge -------------------------------------------------- */
+export interface VerifiedPurchaseBadgeProps {
+  label?: string;
+}
+
+export function VerifiedPurchaseBadge({ label = 'Verified Purchase' }: VerifiedPurchaseBadgeProps) {
+  return (
+    <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1 ring-1 ring-purple-200">
+      <BadgeCheck className="h-3.5 w-3.5 text-purple-600" />
+      <span className="text-xs font-medium text-purple-700">{label}</span>
+    </div>
+  );
+}
+
+/* ==============================================================
+   Showcase gallery — preview every template in one place.
+   Delete this section once you're only importing individual
+   components into your product pages.
+   ============================================================== */
+
+const templates: { name: string; description: string; node: ReactNode }[] = [
+  { name: 'Recent Purchase Toast', description: 'Floating card announcing a fresh sale', node: <RecentPurchaseToast /> },
+  { name: 'Live Visitor Counter', description: 'Real-time pill showing active viewers', node: <LiveVisitorCounter /> },
+  { name: 'Testimonial Card', description: 'Quote with rating and attribution', node: <TestimonialCard /> },
+  { name: 'Trust Badge Bar', description: 'Row of client or partner names', node: <TrustBadgeBar /> },
+  { name: 'Rating Summary', description: 'Average score with a star breakdown', node: <RatingSummary /> },
+  { name: 'Urgency Countdown Banner', description: 'Live countdown driving a deadline', node: <UrgencyCountdownBanner /> },
+  { name: 'Recent Signup Notification', description: 'Toast for a new account or trial', node: <RecentSignupNotification /> },
+  { name: 'Low Stock Alert', description: 'Inline nudge near a limited product', node: <LowStockAlert /> },
+  { name: 'Live Sales Counter', description: 'Ticking total of units sold today', node: <LiveSalesCounter /> },
+  { name: 'Review Carousel', description: 'Click-through set of short reviews', node: <ReviewCarousel /> },
+  { name: 'As Seen On Bar', description: 'Press or media mention strip', node: <AsSeenOnBar /> },
+  { name: 'Milestone Announcement', description: 'One-off banner for a big number', node: <MilestoneAnnouncement /> },
+  { name: 'Cart Activity Notification', description: 'Shows demand on the current product', node: <CartActivityNotification /> },
+  { name: 'Newsletter Social Proof Form', description: 'Signup form with subscriber count', node: <NewsletterSocialProofForm /> },
+  { name: 'Verified Purchase Badge', description: 'Small trust seal for reviews or listings', node: <VerifiedPurchaseBadge /> },
+];
+
+export default function ProofPadTemplateGallery() {
+  return (
+    <div className="min-h-screen bg-purple-50 px-6 py-12">
+      <div className="mx-auto max-w-5xl">
+        <h1 className="text-2xl font-bold text-gray-900">ProofPad Widget Templates</h1>
+        <p className="mt-1 text-sm text-gray-600">
+          15 embeddable social proof widgets. Import any named component above into your product.
+        </p>
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {templates.map((t) => (
+            <div key={t.name} className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-purple-100">
+              <p className="text-sm font-semibold text-gray-900">{t.name}</p>
+              <p className="mt-0.5 text-xs text-gray-500">{t.description}</p>
+              <div className="mt-4 flex items-center justify-center rounded-xl bg-purple-50 p-6">
+                {t.node}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
