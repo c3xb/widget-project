@@ -87,7 +87,7 @@ export default function Header() {
         {isOpen && (
           <div className="absolute top-[125%] right-4 w-48 bg-white border border-gray-200 rounded-xl shadow-lg py-2 flex flex-col md:hidden z-50">
             <a onClick={() => scrollToSection('features')} className="px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors hover: cursor-pointer">Features</a>
-            <a onClick={() => scrollToSection('Editor')} className="px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors hover: cursor-pointer">Widget Editor</a>
+            <a onClick={() => scrollToSection('editor')} className="px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors hover: cursor-pointer">Widget Editor</a>
             <a onClick={() => scrollToSection('templates')} className="px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors hover: cursor-pointer">Widget Templates</a>
           </div>
         )}
