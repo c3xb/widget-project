@@ -60,7 +60,7 @@ export function RecentPurchaseToast({
   if (!visible) return null;
 
   return (
-    <div className="flex w-full max-w-sm items-start gap-3 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-purple-100">
+    <div id="templates" className="flex w-full max-w-sm items-start gap-3 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-purple-100">
       <div className="relative flex-shrink-0">
         {avatarUrl ? (
           <img src={avatarUrl} alt={name} className="h-11 w-11 rounded-full object-cover" />
