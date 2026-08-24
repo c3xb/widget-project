@@ -60,7 +60,7 @@ export function RecentPurchaseToast({
   if (!visible) return null;
 
   return (
-    <div id="templates" className="flex w-full max-w-sm items-start gap-3 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-purple-100">
+    <div className="flex w-full max-w-sm items-start gap-3 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-purple-100">
       <div className="relative flex-shrink-0">
         {avatarUrl ? (
           <img src={avatarUrl} alt={name} className="h-11 w-11 rounded-full object-cover" />
@@ -214,9 +214,8 @@ export function RatingSummary({
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
                 key={i}
-                className={`h-3.5 w-3.5 ${
-                  i < Math.round(average) ? 'fill-purple-500 text-purple-500' : 'text-gray-200'
-                }`}
+                className={`h-3.5 w-3.5 ${i < Math.round(average) ? 'fill-purple-500 text-purple-500' : 'text-gray-200'
+                  }`}
               />
             ))}
           </div>
