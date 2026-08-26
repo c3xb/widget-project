@@ -15,7 +15,9 @@ export default function EmbedModal({ isOpen, onClose, widgetId }: EmbedModalProp
   if (!isOpen) return null;
 
   // Construct the script tag snippet dynamically
-  const embedCode = `<script \n  src="http://192.168.0.135:3000/embed.js"\n  data-widget-id="${widgetId}"\n  async\n></script>`;
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://proofpad-ten.vercel.app';
+
+const embedCode = `<script\n  src="${baseUrl}/embed.js"\n  data-widget-id="${widgetId}"\n  async\n></script>`;
 
  const handleCopy = async () => {
   try {
